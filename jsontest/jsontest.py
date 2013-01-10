@@ -15,6 +15,14 @@ class TestPage(webapp2.RequestHandler):
         self.response.headers['Content-Type'] = 'text/plain'
         self.response.out.write('Test, ')
 
+class ArgTestPage(webapp2.RequestHandler):
+	def post(self):
+		name = self.request.get("name")
+
+        self.response.headers['Content-Type'] = 'text/plain'
+        self.response.out.write('Test, ')
+
+
 class JsonPage(webapp2.RequestHandler):
     def get(self):
         self.response.headers['Content-Type']= 'application/json'
