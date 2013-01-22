@@ -83,6 +83,11 @@ class LoadMedia(webapp2.RequestHandler):
 			# e.new_hire_training_completed = True
 			# db.put(e)
 
+
+class InsertMediaGroupPage(webapp2.RequestHandler):
+	def get(self):
+		
+
 class UpdateMediaGroup(webapp2.RequestHandler):
 	def post(self):
 		logging.info('Starting Main handler')
