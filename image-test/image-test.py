@@ -3,9 +3,12 @@ import cgi
 import urllib
 import logging
 
-from google.appengine.ext import db
-from google.appengine.api import images
 from google.appengine.api import users
+from google.appengine.ext import blobstore
+from google.appengine.ext import db
+from google.appengine.ext import webapp
+from google.appengine.ext.webapp import blobstore_handlers
+from google.appengine.ext.webapp.util import run_wsgi_app
 
 
 class Greeting(db.Model):
@@ -131,11 +134,52 @@ class BlobHandler(webapp2.RequestHandler):
     self.response.out.write("""Upload File: <input type="file" name="file"><br> <input type="submit"
         name="submit" value="Submit"> </form></body></html>""")
 
+
+import requests
+from email.mime.multipart import MIMEMultipart
+from email.mime.image import MIMEImage    
+
+# http://docs.python-requests.org/en/latest/
 class UploadHandler(blobstore_handlers.BlobstoreUploadHandler):
-  def post(self):
-    upload_files = self.get_uploads('file')  # 'file' is file upload field in the form
-    blob_info = upload_files[0]
-    self.redirect('/serve/%s' % blob_info.key())
+    def post(self):
+        upload_files = self.get_uploads('file')  # 'file' is file upload field in the form
+        blob_info = upload_files[0]
+
+        blob_key = blobstore.BlobInfo.get(blob_info.key())
+        blob_reader = blobstore.BlobReader(blob_key, buffer_size=1048576)
+
+        img = blob_reader.read()
+        self.upload_image(img)
+        self.redirect('/serve/%s' % blob_info.key())
+
+    def upload_image(self, img):
+        # related = MIMEMultipart('related')
+
+        # img_mime = 
+
+        # submission = MIMEText('text', 'xml', 'utf8')
+        # submission.set_payload(open('submission_set.xml', 'rb').read())
+        # related.attach(submission)
+
+        # document = MIMEText('text', 'plain')
+        # document.set_payload(open('document.txt', 'rb').read())
+        # related.attach(document)
+
+        # headers = dict(related.items())
+        # body = related.as_string().split('\n\n', 1)[1]
+
+        # r = requests.post(url, data=body, headers=headers)
+        url = 'https://picasaweb.google.com/data/feed/api/user/111354041149257807573/albumid/5933375923903008817'
+        # url = 'https://picasaweb.google.com/data/feed/api/user/userID/albumid/albumID'
+        headers = {'content-type': 'image/jpeg',
+                    'Content-Length': '47899',
+                    'Slug': 'plz-to-love-realcat.jpg'
+                }
+        files = {'file': img}
+        # r = requests.post(url, data=img, headers=headers)
+        r = requests.post(url, files=files, headers=headers)
+        print (r)
+
 
 class ServeHandler(blobstore_handlers.BlobstoreDownloadHandler):
   def get(self, resource):
