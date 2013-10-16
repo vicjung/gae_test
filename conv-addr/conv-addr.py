@@ -1,118 +1,138 @@
-# -*- coding: utf-8 -*-
-import urllib2
-import csv
-import re
-import sqlite3
-from bs4 import BeautifulSoup
+import webapp2
+import json
+import datetime
+import time
+from google.appengine.ext import db
+from google.appengine.api import users
+# from oauth2client.client import flow_from_clientsecrets
+# from oauth2client.client import OAuth2WebServerFlow
+from oauth2client.appengine import OAuth2Decorator
+
+decorator = OAuth2Decorator(
+  client_id='your_client_id',
+  client_secret='your_client_secret',
+  scope='https://www.googleapis.com/auth/calendar')
+
+service = build('calendar', 'v3')
+
+class MainPage(webapp2.RequestHandler):
+    def get(self):
+        self.response.headers['Content-Type'] = 'text/plain'
+        self.response.out.write('Hello, ')
+
+class GAuthPage(webapp2.RequestHandler):
+	@decorator.oauth_required
+	def get(self):
+		# Get the authorized Http object created by the decorator.
+		http = decorator.http()
+		# Call the service using the authorized Http object.
+		request = service.events().list(calendarId='primary')
+		response = request.execute(http=http)	
+			
+		# auth_uri = "http:// /auth_return"
+		# flow = flow_from_clientsecrets('path_to_directory/client_secrets.json',
+  #                              scope='https://www.googleapis.com/auth/calendar',
+  #                              redirect_uri='http://example.com/auth_return')
+		# flow = OAuth2WebServerFlow(client_id='your_client_id',
+		#                            client_secret='your_client_secret',
+		#                            scope='https://www.googleapis.com/auth/calendar',
+		#                            redirect_uri='http://example.com/auth_return')		
 
 
-class address_data(object):
-
-
-
-address = "http://www.nolruwa.com/bbs/board.php?bo_table=A_sub01&wr_id=61&page=1" 
-website = urllib2.urlopen(address) 
-website_html = website.read() 
-print (website_html)
-
-title_index = website_html.find('상호')
-phone_index = website_html.find('전화번호')
-
-title_substring = website_html[title_index:phone_index-title_index]
-
-match = re.search('<td>[.]+</td>', title_substring)
-if (match):
-	print (match)
-	print (match.group()) 
-
-
-
-# print (website_html)
-
-# matches = sre.findall('<img .*src="?(.*?)"?', website_text) 
-
-# dir = website_handle.geturl().rsplit('/',1)[0] 
-# if (dir == "http:/"):
-# 	dir = website_handle.geturl()
-
-
-# soup.prettify()
-# print soup.prettify()
-
-
-# csvfile = csv.writer(open('eggs.csv', 'wb'))
-
-# for page_num in range(1, 25):
-# 	print (page_num)
-# 	address = "http://www.hungryboarder.com/index.php?mid=Movie&listStyle=list&sort_index=voted_count&order_type=desc&page=%d" % page_num  #"http://www.hungryboarder.com/index.php?mid=Movie&listStyle=list"
-# 	website = urllib2.urlopen(address) 
-# 	website_html = website.read() 
-
-# 	soup = BeautifulSoup(website_html)
-
-# 	count = 0
-# 	table_row = soup("tr", {'class' : ['bg1', 'bg2'] })
-# 	for row in table_row:
-# 		# print (row.td['class'][0])
-# 		# print (row)
-# 		for td in row.find_all('td'):
-# 			# print (td['class'])
-# 			# print (td)
-# 			if td['class'][0] == u'title':
-# 				entry = td
-# 				# print (entry)
-
-# 				if (entry.strong) :
-# 					category = entry.strong.string.encode("utf-8")
-# 				else:
-# 					category = ""
-# 					print (entry)
-
-# 				title = entry.a.string.encode("utf-8")
-# 				link = entry.a['href']
-# 				link_match = re.search('document_srl=[0-9]+', link)
-# 				link_url=""
-# 				if (link_match):
-# 					# print (link_match)
-# 					link_url = link_match.group()
-# 				# print (link_url)
-# 			elif td['class'][0] == u'recommend':
-# 				entry = td
-# 				recommend = entry.string.encode("utf-8")
-# 			elif td['class'][0] == u'date':
-# 				entry = td
-# 				date = entry.string.encode("utf-8")
-
-# 		csvfile.writerow([category, link_url, recommend, date])
-# 		count += 1
-
-# 	print ("page row => %d" % count)
-
-# csvfile.close()
+class GAuthReturnPage(webapp2.RequestHandler):
+	def get(self):
+		# http://example.com/auth_return/?code=kACAH-1Ng1MImB...AA7acjdY9pTD9M
+		# http://example.com/auth_return/?error=access_denied
 
 
 
+class TestPage(webapp2.RequestHandler):
+    def get(self):
+        self.response.headers['Content-Type'] = 'text/plain'
+        self.response.out.write('Test, ')
+
+class ArgTestPage(webapp2.RequestHandler):
+	def post(self):
+		name = self.request.get("name")
+
+        self.response.headers['Content-Type'] = 'text/plain'
+        self.response.out.write('Test, ')
 
 
-#<td class="title"> 검색
-# table = soup("td", {'class' : 'title' })
-# for entry in table:
-#      # print entry.strong.contents
-#      print entry.strong.string.encode("utf-8")
-#      print entry.a['href']
-#      print entry.a.string.encode("utf-8")
+class JsonPage(webapp2.RequestHandler):
+    def get(self):
+        self.response.headers['Content-Type']= 'application/json'
+        self.response.out.write(json.dumps(['foo', {'bar': ('baz', None, 1.0, 2)}]))
 
-     # for child in entry.contents:
-     # table_soup = BeautifulSoup(entry.string)
-     # table_content = table_soup("strong", {'class' : 'category'})
-     # print(table_content[0])
+# SIMPLE_TYPES = (int, long, float, bool, dict, basestring, list)
+# def to_dict(model):
+#     output = {}
 
-     # for child in entry.children:
-     # 	print(child)
-     	# if child['class'] == "category":
-     		# print child
+#     for key, prop in model.properties().iteritems():
+#         value = getattr(model, key)
 
-     # try:
-         # print entry.string
-     # except AttributeError:
-         # print 'No string'
+#         if value is None or isinstance(value, SIMPLE_TYPES):
+#             output[key] = value
+#         elif isinstance(value, datetime.date):
+#             # Convert date/datetime to ms-since-epoch ("new Date()").
+#             ms = time.mktime(value.utctimetuple())
+#             ms += getattr(value, 'microseconds', 0) / 1000
+#             output[key] = int(ms)
+#         elif isinstance(value, db.GeoPt):
+#             output[key] = {'lat': value.lat, 'lon': value.lon}
+#         elif isinstance(value, db.Model):
+#             output[key] = to_dict(value)
+#         else:
+#             raise ValueError('cannot encode ' + repr(prop))
+
+#     return output
+
+class Employee(db.Model):
+	name = db.StringProperty(required=True)
+	role = db.StringProperty(required=True,
+	                       choices=set(["executive", "manager", "producer"]))
+	hire_date = db.DateProperty()
+	new_hire_training_completed = db.BooleanProperty(indexed=False)
+	email = db.StringProperty()      
+	def to_dict(self):
+		return dict([(p, unicode(getattr(self, p))) for p in self.properties()])
+
+
+class SaveEmployee(webapp2.RequestHandler):
+	def get(self):
+		e = Employee(name="John",
+		             role="manager",
+		             email="test")#users.get_current_user().email())
+		e.hire_date = datetime.datetime.now().date()
+		e.put()
+
+		self.response.headers['Content-Type'] = 'text/plain'
+		self.response.out.write('Save Employee')
+
+class LoadEmployee(webapp2.RequestHandler):
+	def get(self):
+		training_registration_list = ["Alfred.Smith@example.com",
+		                              "jharrison@example.com",
+		                              "budnelson@example.com"]
+		employees_trained = db.GqlQuery("SELECT * FROM Employee ")
+        
+		if (employees_trained.count() > 0):
+			self.response.headers['Content-Type']= 'application/json'
+		 	self.response.out.write(json.dumps([p.to_dict() for p in employees_trained]))			
+		else:
+			self.response.headers['Content-Type']= 'application/json'
+			self.response.out.write('')
+		# self.response.out.write(json.dumps(['foo', {'bar': ('baz', None, 1.0, 2)}]))
+		# for e in employees_trained:
+			# e.new_hire_training_completed = True
+			# db.put(e)
+
+		
+
+
+
+app = webapp2.WSGIApplication([('/', MainPage), ('/test', TestPage), ('/json', JsonPage)
+									, ('/load', LoadEmployee), ('/save', SaveEmployee)
+									, (decorator.callback_path, decorator.callback_handler())
+									]
+								, debug=True)

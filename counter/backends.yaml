@@ -1,0 +1,13 @@
+backends:
+- name: counter
+  start: counter.py
+  instances: 1
+  class: B2
+
+# NOTE: Disable the load test so that it does not automatically start in the
+# dev_appserver.
+#
+#- name: loadtest
+#  start: loadtest.py
+#  instances: 10
+#  class: B1
