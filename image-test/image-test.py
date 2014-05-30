@@ -1,3 +1,4 @@
+# -*- coding:utf-8 -*-
 import webapp2
 import cgi
 import urllib
@@ -70,6 +71,10 @@ class MainPage(webapp2.RequestHandler):
               <hr>
               <form>Guestbook name: <input value="%s" name="guestbook_name">
               <input type="submit" value="switch"></form>
+
+              <div>
+              <a href='/img_test'>img_test</a>
+              </div>
             </body>
           </html>""" % (urllib.urlencode({'guestbook_name': guestbook_name}),
                         cgi.escape(guestbook_name)))
@@ -187,11 +192,56 @@ class ServeHandler(blobstore_handlers.BlobstoreDownloadHandler):
     blob_info = blobstore.BlobInfo.get(resource)
     self.send_blob(blob_info)
 
+class LoadFailImageTest(webapp2.RequestHandler):
+  def get(self):
+    self.response.out.write("""<html>
+          <head>
+            <link rel="stylesheet" type="text/css" href="css/style.css" />
+            <script type="text/javascript" src="lib/jquery-1.9.0.min.js"></script>
+
+          </head> 
+        <body>
+            <img src="/img/aesert.jpg" onerror="this.src='/noimage'";>
+        </body>
+        """)    
+
+            # <script type="text/javascript">
+            #     $().ready(function() {
+            #         $('img').each(function(n) {
+            #             $(this).error(function() {
+            #                 $(this).attr('src', '/images/noimage.gif');
+            #             });
+            #         });
+            #     });
+            # </script>
+
+    # <img src="/img/Desert.jpg" >
+    # <IMG src="이미지주소1" onerror="this.src='이미지1이 없을경우 대처할 이미지주소2'";>
+    pass
+
+class NoImagePage(webapp2.RequestHandler):
+  def get(self):
+    self.redirect("/img/Penguins.jpg")
+
+
+# $().ready(function() {
+#     $('img').each(function(n) {
+#         $(this).error(function() {
+#             $(this).attr('src', '/images/noimage.gif');
+#         });
+#     });
+# });
+
+class FancyImageTest(webapp2.RequestHandler):
+  def get(self):
+    pass
 
 app = webapp2.WSGIApplication([('/', MainPage),
                                ('/blob', BlobHandler),
                                ('/upload', UploadHandler),
                                ('/serve/([^/]+)?', ServeHandler),
                                ('/img', Image),
+                               ('/img_test', LoadFailImageTest),
+                               ('/noimage', NoImagePage),
                                ('/sign', Guestbook)],
                               debug=True)
