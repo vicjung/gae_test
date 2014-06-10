@@ -3,6 +3,8 @@ import webapp2
 import cgi
 import urllib
 import logging
+import json
+import os
 
 from google.appengine.api import users
 from google.appengine.ext import blobstore
@@ -10,6 +12,7 @@ from google.appengine.ext import db
 from google.appengine.ext import webapp
 from google.appengine.ext.webapp import blobstore_handlers
 from google.appengine.ext.webapp.util import run_wsgi_app
+from google.appengine.ext.webapp import template
 
 
 class Greeting(db.Model):
@@ -233,8 +236,31 @@ class NoImagePage(webapp2.RequestHandler):
 # });
 
 class FancyImageTest(webapp2.RequestHandler):
-  def get(self):
-    pass
+    def get(self):
+        template_values = {}
+        path = os.path.join(os.path.dirname(__file__), 'static/mytest.html')
+        self.response.out.write(template.render(path, template_values))
+
+
+class FancyAjaxTest(webapp2.RequestHandler):
+    def post(self):
+
+        images = [
+            {
+                'href' : 'img/1_b.jpg',                
+                'title' : 'Gallery 1 - 1'
+            },
+            {
+                'href' : 'img/2_b.jpg',                
+                'title' : 'Gallery 1 - 2'
+            },
+            {
+                'href' : 'img/3_b.jpg',                
+                'title' : 'Gallery 1 - 3'
+            }
+        ]        
+
+        self.response.out.write(json.dumps(images))
 
 app = webapp2.WSGIApplication([('/', MainPage),
                                ('/blob', BlobHandler),
@@ -243,5 +269,6 @@ app = webapp2.WSGIApplication([('/', MainPage),
                                ('/img', Image),
                                ('/img_test', LoadFailImageTest),
                                ('/noimage', NoImagePage),
+                               ('/fancytest', FancyImageTest), ('/preview', FancyAjaxTest),
                                ('/sign', Guestbook)],
                               debug=True)
