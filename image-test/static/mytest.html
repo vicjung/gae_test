@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>fancyBox - Fancy jQuery Lightbox Alternative | Demonstration</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+	<script type="text/javascript" src="lib/jquery-1.10.1.min.js"></script>
+	<script type="text/javascript" src="lib/jquery.mousewheel-3.0.6.pack.js"></script>
+	<script type="text/javascript" src="fancy/jquery.fancybox.js?v=2.1.5"></script>
+	<link rel="stylesheet" type="text/css" href="fancy/jquery.fancybox.css?v=2.1.5" media="screen" />
+	
+
+	<!-- Add Button helper (this is optional) -->
+	<link rel="stylesheet" type="text/css" href="fancy/helpers/jquery.fancybox-buttons.css?v=1.0.5" />
+	<script type="text/javascript" src="fancy/helpers/jquery.fancybox-buttons.js?v=1.0.5"></script>
+
+	<!-- Add Thumbnail helper (this is optional) -->
+	<link rel="stylesheet" type="text/css" href="fancy/helpers/jquery.fancybox-thumbs.css?v=1.0.7" />
+	<script type="text/javascript" src="fancy/helpers/jquery.fancybox-thumbs.js?v=1.0.7"></script>
+
+	<!-- Add Media helper (this is optional) -->
+	<script type="text/javascript" src="fancy/helpers/jquery.fancybox-media.js?v=1.0.6"></script>
+
+	<script type="text/javascript">
+		var images = {
+		    1: [
+		        {
+		            href : 'img/1_b.jpg',                
+		            title : 'Gallery 1 - 1'
+		        },
+		        {
+		            href : 'img/2_b.jpg',                
+		            title : 'Gallery 1 - 2'
+		        },
+		        {
+		            href : 'img/3_b.jpg',                
+		            title : 'Gallery 1 - 3'
+		        }
+		    ],
+		    2: [
+		        {
+		            href : 'img/4_b.jpg',                
+		            title : 'Gallery 2 - 1'
+		        },
+		        {
+		            href : 'img/5_b.jpg',                
+		            title : 'Gallery 2 - 2'
+		        }
+		    ]
+		};	
+		$(document).ready(function() {
+			/*
+			 *  Simple image gallery. Uses default settings
+			 */
+
+			$('.fancybox').fancybox();
+
+			$('.preview2').on("click", function (e) {
+				e.preventDefault(); // avoids calling preview.php
+
+			    // $.fancybox.open(images[ $(this).index() + 1], {
+			    //     padding : 0
+			    // });				
+				$.ajax({
+				  type: "POST",
+				  cache: false,
+				  url: this.href, // preview.php
+				  //data: $("#postp").serializeArray(), // all form fields
+				  data: this.data_u,
+				  success: function (data) {
+				  	var recv_img = $.parseJSON(data)
+				  	// var recv_img = [
+							// 	        {
+							// 	            href : 'img/1_b.jpg',                
+							// 	            title : 'Gallery 1 - 1'
+							// 	        },
+							// 	        {
+							// 	            href : 'img/2_b.jpg',                
+							// 	            title : 'Gallery 1 - 2'
+							// 	        },
+							// 	        {
+							// 	            href : 'img/3_b.jpg',                
+							// 	            title : 'Gallery 1 - 3'
+							// 	        }
+							// 	    ]
+
+
+
+					// on success, post (preview) returned data in fancybox
+					$.fancybox(recv_img, {
+					  // fancybox API options
+					  fitToView: false,
+					  width: 905,
+					  height: 505,
+					  autoSize: false,
+					  closeClick: false,
+					  loop: false,
+					  openEffect: 'none',
+					  closeEffect: 'none'
+					}); // fancybox
+
+					// alert('test')
+
+					// $('.fancybox').fancybox();
+				 //    $.fancybox.open(images[ $(this).index() + 1], {
+				 //        padding : 0
+				 //    });
+				  } // success
+				}); // ajax
+			}); // on
+  
+		});
+	</script>
+	<style type="text/css">
+		.fancybox-custom .fancybox-skin {
+			box-shadow: 0 0 50px #222;
+		}
+
+		body {
+			max-width: 700px;
+			margin: 0 auto;
+		}
+	</style>
+</head>
+<body>
+	<h1>fancyBox</h1>
+
+	<p>This is a demonstration. More information and examples: <a href="http://fancyapps.com/fancybox/">www.fancyapps.com/fancybox/</a></p>
+
+	<h3>Simple image gallery</h3>
+	<p>
+		<a class="fancybox" href="img/1_b.jpg" data-fancybox-group="gallery" title="Lorem ipsum dolor sit amet"><img src="img/1_s.jpg" alt="" /></a>
+
+		<a class="fancybox" href="img/2_b.jpg" data-fancybox-group="gallery" title="Etiam quis mi eu elit temp"><img src="img/2_s.jpg" alt="" /></a>
+
+		<a class="fancybox" href="img/3_b.jpg" data-fancybox-group="gallery" title="Cras neque mi, semper leon"><img src="img/3_s.jpg" alt="" /></a>
+
+		<a class="fancybox" href="img/4_b.jpg" data-fancybox-group="gallery" title="Sed vel sapien vel sem uno"><img src="img/4_s.jpg" alt="" /></a>
+	</p>
+
+	<h3>Various types</h3>
+	<ul>
+		<li><a class="fancybox fancybox.ajax" href="ajax.txt">Ajax</a></li>
+		<li><a class="preview2" data-fancybox-type="ajax" href="/preview" id="preview2" data_u="aaaa">Preview</a></li>
+		<li><a class="fancybox fancybox.iframe" href="iframe.html">Iframe</a></li>
+	</ul>
+
+
+
+</body>
+</html>
